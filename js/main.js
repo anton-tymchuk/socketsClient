@@ -18,8 +18,8 @@ $(function () {
     }
     var loadConfig = function() {
         var config = getConfig();
-        if(!config) {
-            writeOutput('Did you forgot to create your own config? ');
+        if(!config.server) {
+            writeOutput('Did you forgot to create your own config?');
         }
     }
     var getConnectionParams = function () {
@@ -42,7 +42,7 @@ $(function () {
             writeOutput('socket open');
         };
         sock.onmessage = function (message) {
-            writeOutput('message received ' + JSON.stringify(message.data));
+            writeOutput(JSON.parse(message.data), 'Message received');
         };
         sock.onclose = function () {
             writeOutput('socket closed');
@@ -50,18 +50,7 @@ $(function () {
     })
     $("#send").click(function (e) {
         e.preventDefault();
-
-        var toSend = {
-            "t": "request",
-            "a": "performance.qualify",
-            "d": {
-                "accessToken": "7dbe8cbe314938aa248f94f8a960e8986f683efa412a6f118d95b3aef38acd5e",
-                "id": "c924bf1e-0c73-435f-95c6-f85779ffc430",
-                "qualify": "bret"
-            }
-        };
-
-        sock.send(JSON.stringify(toSend));
+        sock.send($('#body').val());
         return;
     });
     $("#close").click(function (e) {
@@ -71,14 +60,17 @@ $(function () {
     });
 
 
-    var writeOutput = function (output) {
+    var writeOutput = function (output, message) {
         console.log(output);
-        $('#output').append('<div>' + output + '</div>');
+        resultString = '';
+        if(message) resultString += '<h5>' + message + '</h5>';
+        $('#output').prepend(
+            resultString + '<pre>'
+            + JSON.stringify(output, null, 4)
+            + '</pre>'
+        );
     }
     run();
 
 
 });
-/**
- * Created by igor on 09/09/15.
- */
