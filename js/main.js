@@ -1,85 +1,85 @@
 $(function () {
-    var sock = null;
-    var server = $('#server');
-    var port = $('#port');
-    var path = $('#path');
-    var messageBody = $('#body');
-
-    var getConfig = function () {
-        // @todo: make file implementation instead of mock
-        var connectionParams = {
+    var socketClient = {
+        connectionParams: {
             "server": "http://talpa.local",
             "port": 3001,
             "path": "soccom"
+        },
+        sock: null,
+        server: $('#server'),
+        port: $('#port'),
+        path: $('#path'),
+        messageBody: $('#body'),
+        getConfig: function () {
+            // @todo: make file implementation instead of mock
+            socketClient.server.val(socketClient.connectionParams.server);
+            socketClient.port.val(socketClient.connectionParams.port);
+            socketClient.path.val(socketClient.connectionParams.path)
+            return socketClient.connectionParams;
+        },
+        loadConfig: function () {
+            var config = socketClient.getConfig();
+            if (!config.server) {
+                socketClient.writeOutput('Did you forgot to create your own config?');
+            }
+        },
+        getConnectionParams: function () {
+            return {
+                server: socketClient.server.val(),
+                port: socketClient.port.val(),
+                path: socketClient.path.val()
+            }
+        },
+        run: function () {
+            socketClient.formProcessor();
+            socketClient.loadConfig();
+            socketClient.prettyPrint();
+            socketClient.messageBody.focusout(function () {
+                prettyPrint()
+            });
+        },
+        prettyPrint: function () {
+            var ugly = socketClient.messageBody.val();
+            var obj = JSON.parse(ugly);
+            var pretty = JSON.stringify(obj, undefined, 4);
+            socketClient.messageBody.val(pretty);
+        },
+        formProcessor: function () {
+            $("#open").click(function (e) {
+                e.preventDefault();
+                var cp = socketClient.getConnectionParams();
+                socketClient.sock = new SockJS(cp.server + ':' + cp.port + '/' + cp.path)
+                socketClient.sock.onopen = function () {
+                    socketClient.writeOutput('socket open');
+                };
+                socketClient.sock.onmessage = function (message) {
+                    socketClient.writeOutput(JSON.parse(message.data), 'Message received');
+                };
+                socketClient.sock.onclose = function () {
+                    socketClient.writeOutput('socket closed');
+                };
+            })
+            $("#send").click(function (e) {
+                e.preventDefault();
+                socketClient.sock.send($('#body').val());
+            });
+            $("#close").click(function (e) {
+                e.preventDefault();
+                socketClient.sock.close();
+            });
+        },
+        writeOutput: function (output, message) {
+            console.log(output);
+            resultString = '';
+            if (message) resultString += '<h5>' + message + '</h5>';
+            $('#output').prepend(
+                resultString + '<pre>'
+                + JSON.stringify(output, null, 4)
+                + '</pre>'
+            );
         }
-        server.val(connectionParams.server);
-        port.val(connectionParams.port);
-        path.val(connectionParams.path)
-        return connectionParams;
-    }
-    var loadConfig = function() {
-        var config = getConfig();
-        if(!config.server) {
-            writeOutput('Did you forgot to create your own config?');
-        }
-    }
-    var getConnectionParams = function () {
-        return {
-            server: server.val(),
-            port: port.val(),
-            path: path.val()
-        }
-    }
-    var run = function() {
-        loadConfig();
-        prettyPrint();
-        messageBody.focusout(function(){prettyPrint()});
-    }
-
-    function prettyPrint() {
-        var ugly = messageBody.val();
-        var obj = JSON.parse(ugly);
-        var pretty = JSON.stringify(obj, undefined, 4);
-        messageBody.val(pretty);
-    }
-
-    $("#open").click(function (e) {
-        e.preventDefault();
-        var cp = getConnectionParams();
-        sock = new SockJS(cp.server + ':' + cp.port + '/' + cp.path)
-        sock.onopen = function () {
-            writeOutput('socket open');
-        };
-        sock.onmessage = function (message) {
-            writeOutput(JSON.parse(message.data), 'Message received');
-        };
-        sock.onclose = function () {
-            writeOutput('socket closed');
-        };
-    })
-    $("#send").click(function (e) {
-        e.preventDefault();
-        sock.send($('#body').val());
-        return;
-    });
-    $("#close").click(function (e) {
-        e.preventDefault();
-        sock.close();
-        return;
-    });
+    };
 
 
-    var writeOutput = function (output, message) {
-        console.log(output);
-        resultString = '';
-        if(message) resultString += '<h5>' + message + '</h5>';
-        $('#output').prepend(
-            resultString + '<pre>'
-            + JSON.stringify(output, null, 4)
-            + '</pre>'
-        );
-    }
-    run();
-
-
+    socketClient.run();
 });
