@@ -1,31 +1,29 @@
-$(function() {
+$(function () {
     var sock = null;
-    $("#open").click(function(e){
+
+
+    $("#open").click(function (e) {
         e.preventDefault();
-        sock = new SockJS('http://talpa.local:3001/soccom')
-        // sock.open();
-        sock.onopen = function() {
-            // console.log('loaded');
-            console.log('socket open');
+        sock = new SockJS($('#server').val() + ':' + $('#port').val() + '/' + $('#path').val())
+        sock.onopen = function () {
+            writeOutput('socket open');
         };
-        sock.onmessage = function(message) {
-            console.log('message received', message.data);
+        sock.onmessage = function (message) {
+            writeOutput('message received ', message.data);
         };
-        sock.onclose = function() {
-            console.log('close');
+        sock.onclose = function () {
+            writeOutput('socket closed');
         };
     })
-    $("#send").click(function(e){
+    $("#send").click(function (e) {
         e.preventDefault();
 
         var toSend = {
             "t": "request",
             "a": "performance.qualify",
             "d": {
-                "accessToken":"7dbe8cbe314938aa248f94f8a960e8986f683efa412a6f118d95b3aef38acd5e",
+                "accessToken": "7dbe8cbe314938aa248f94f8a960e8986f683efa412a6f118d95b3aef38acd5e",
                 "id": "c924bf1e-0c73-435f-95c6-f85779ffc430",
-                // "qualification:":"ok",
-                // "performance:":"qwertyuiopasdfghjklzxcvbnmqwertyuiop",
                 "qualify": "bret"
             }
         };
@@ -33,11 +31,19 @@ $(function() {
         sock.send(JSON.stringify(toSend));
         return;
     });
-    $("#close").click(function(e){
+    $("#close").click(function (e) {
         e.preventDefault();
         sock.close();
         return;
     });
+
+
+    var writeOutput = function (output) {
+        console.log(output);
+        $('#output').append('<div>' + output + '</div>');
+    }
+
+
 });
 /**
  * Created by igor on 09/09/15.
