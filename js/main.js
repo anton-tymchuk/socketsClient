@@ -3,6 +3,7 @@ $(function () {
     var server = $('#server');
     var port = $('#port');
     var path = $('#path');
+    var messageBody = $('#body');
 
     var getConfig = function () {
         // @todo: make file implementation instead of mock
@@ -31,8 +32,16 @@ $(function () {
     }
     var run = function() {
         loadConfig();
+        prettyPrint();
+        messageBody.focusout(function(){prettyPrint()});
     }
 
+    function prettyPrint() {
+        var ugly = messageBody.val();
+        var obj = JSON.parse(ugly);
+        var pretty = JSON.stringify(obj, undefined, 4);
+        messageBody.val(pretty);
+    }
 
     $("#open").click(function (e) {
         e.preventDefault();
