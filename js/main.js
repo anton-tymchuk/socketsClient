@@ -1,15 +1,48 @@
 $(function () {
     var sock = null;
+    var server = $('#server');
+    var port = $('#port');
+    var path = $('#path');
+
+    var getConfig = function () {
+        // @todo: make file implementation instead of mock
+        var connectionParams = {
+            "server": "http://talpa.local",
+            "port": 3001,
+            "path": "soccom"
+        }
+        server.val(connectionParams.server);
+        port.val(connectionParams.port);
+        path.val(connectionParams.path)
+        return connectionParams;
+    }
+    var loadConfig = function() {
+        var config = getConfig();
+        if(!config) {
+            writeOutput('Did you forgot to create your own config? ');
+        }
+    }
+    var getConnectionParams = function () {
+        return {
+            server: server.val(),
+            port: port.val(),
+            path: path.val()
+        }
+    }
+    var run = function() {
+        loadConfig();
+    }
 
 
     $("#open").click(function (e) {
         e.preventDefault();
-        sock = new SockJS($('#server').val() + ':' + $('#port').val() + '/' + $('#path').val())
+        var cp = getConnectionParams();
+        sock = new SockJS(cp.server + ':' + cp.port + '/' + cp.path)
         sock.onopen = function () {
             writeOutput('socket open');
         };
         sock.onmessage = function (message) {
-            writeOutput('message received ', message.data);
+            writeOutput('message received ' + JSON.stringify(message.data));
         };
         sock.onclose = function () {
             writeOutput('socket closed');
@@ -42,6 +75,7 @@ $(function () {
         console.log(output);
         $('#output').append('<div>' + output + '</div>');
     }
+    run();
 
 
 });
