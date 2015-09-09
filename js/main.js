@@ -70,7 +70,7 @@ $(function () {
         },
         writeOutput: function (output, message) {
             console.log(output);
-            resultString = '';
+            var resultString = '';
             if (message) resultString += '<h5>' + message + '</h5>';
             $('#output').prepend(
                 resultString + '<pre>'
