@@ -17,6 +17,10 @@ specify your connection data.
 - SockJS
 - TwitterBootstrap3
 - jQuery
+
+### FAQ
+Q: A wildcard '*' cannot be used in the 'Access-Control-Allow-Origin' header when the credentials flag is true. Origin 'null' is therefore not allowed access.
+A: Easiest way - search on your project by string 'Access-Control-Allow-Origin', find it, and replace * to your domain name (in case of local dev server). Don't forget to restart socket server. 
  
 
 ### Todo
