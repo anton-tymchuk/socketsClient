@@ -1,5 +1,6 @@
 $(function () {
     var socketClient = {
+        // @todo: mowe this to separate file
         connectionParams: {
             "server": "http://talpa.local",
             "port": 3001,
@@ -11,7 +12,6 @@ $(function () {
         path: $('#path'),
         messageBody: $('#body'),
         getConfig: function () {
-            // @todo: make file implementation instead of mock
             socketClient.server.val(socketClient.connectionParams.server);
             socketClient.port.val(socketClient.connectionParams.port);
             socketClient.path.val(socketClient.connectionParams.path)
