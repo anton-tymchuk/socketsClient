@@ -34,9 +34,7 @@ $(function () {
             socketClient.formProcessor();
             socketClient.loadConfig();
             socketClient.prettyPrint();
-            socketClient.messageBody.focusout(function () {
-                prettyPrint()
-            });
+            socketClient.messageBody.focusout(prettyPrint);
         },
         prettyPrint: function () {
             var ugly = socketClient.messageBody.val();
