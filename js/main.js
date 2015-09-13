@@ -1,72 +1,77 @@
 $(function () {
-    var socketClient = {
-        // @todo: mowe this to separate file
-        connectionParams: {
-            "server": "http://talpa.local",
-            "port": 3001,
-            "path": "soccom"
-        },
-        sock: null,
-        server: $('#server'),
-        port: $('#port'),
-        path: $('#path'),
-        messageBody: $('#body'),
-        getConfig: function () {
-            socketClient.server.val(socketClient.connectionParams.server);
-            socketClient.port.val(socketClient.connectionParams.port);
-            socketClient.path.val(socketClient.connectionParams.path)
-            return socketClient.connectionParams;
-        },
-        loadConfig: function () {
-            var config = socketClient.getConfig();
+
+    var socketClient = function () {
+
+        var connectionParams = {
+            'server': 'http://talpa.local',
+            'port': 3001,
+            'path': 'soccom'
+        };
+
+        var settings = {
+            sock: null,
+            server: $('#server'),
+            port: $('#port'),
+            path: $('#path'),
+            messageBody: $('#body')
+        };
+
+        // Privat methods
+        function getConfig(){
+            settings.server.val(connectionParams.server);
+            settings.port.val(connectionParams.port);
+            settings.path.val(connectionParams.path);
+            return connectionParams;
+        }
+
+        function loadConfig() {
+            var config = getConfig();
             if (!config.server) {
-                socketClient.writeOutput('Did you forgot to create your own config?');
+                writeOutput('Did you forgot to create your own config?');
             }
-        },
-        getConnectionParams: function () {
+        }
+
+        function getConnectionParams() {
             return {
-                server: socketClient.server.val(),
-                port: socketClient.port.val(),
-                path: socketClient.path.val()
-            }
-        },
-        run: function () {
-            socketClient.formProcessor();
-            socketClient.loadConfig();
-            socketClient.prettyPrint();
-            socketClient.messageBody.focusout(prettyPrint);
-        },
-        prettyPrint: function () {
-            var ugly = socketClient.messageBody.val();
+                server: settings.server.val(),
+                port: settings.port.val(),
+                path: settings.path.val()
+            };
+        }
+
+        function prettyPrint() {
+            var ugly = settings.messageBody.val();
             var obj = JSON.parse(ugly);
             var pretty = JSON.stringify(obj, undefined, 4);
-            socketClient.messageBody.val(pretty);
-        },
-        formProcessor: function () {
+            settings.messageBody.val(pretty);
+        }
+
+        function formProcessor() {
             $("#open").click(function (e) {
                 e.preventDefault();
-                var cp = socketClient.getConnectionParams();
-                socketClient.sock = new SockJS(cp.server + ':' + cp.port + '/' + cp.path)
-                socketClient.sock.onopen = function () {
-                    socketClient.writeOutput('socket open');
+                var cp = getConnectionParams();
+                settings.sock = new SockJS(cp.server + ':' + cp.port + '/' + cp.path)
+                settings.sock.onopen = function () {
+                    writeOutput('socket open');
                 };
-                socketClient.sock.onmessage = function (message) {
-                    socketClient.writeOutput(JSON.parse(message.data), 'Message received');
+                settings.sock.onmessage = function (message) {
+                    writeOutput(JSON.parse(message.data), 'Message received');
                 };
-                socketClient.sock.onclose = function () {
-                    socketClient.writeOutput('socket closed');
+                settings.sock.onclose = function () {
+                    writeOutput('socket closed');
                 };
             })
             $("#send").click(function (e) {
                 e.preventDefault();
-                socketClient.sock.send($('#body').val());
+                settings.sock.send($('#body').val());
             });
             $("#close").click(function (e) {
                 e.preventDefault();
-                socketClient.sock.close();
+                settings.sock.close();
             });
-        },
-        writeOutput: function (output, message) {
+        }
+
+        function writeOutput (output, message) {
             console.log(output);
             var resultString = '';
             if (message) resultString += '<h5>' + message + '</h5>';
@@ -76,8 +81,20 @@ $(function () {
                 + '</pre>'
             );
         }
+
+        // Public methods
+        var run = function () {
+            formProcessor();
+            loadConfig();
+            prettyPrint();
+            settings.messageBody.focusout(prettyPrint);
+        };
+
+        // Return public methods
+        return {
+            run: run
+        };
     };
 
-
-    socketClient.run();
+    socketClient().run();
 });
